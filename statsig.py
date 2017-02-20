@@ -126,8 +126,22 @@ if __name__ == '__main__':
     n = len(ref)
 
     methods = data.dtype.names
-    methods = methods[1:]
+    methods = methods[1:] # skip ref
+    methods = list(methods)
+
+    method_data = []
+    for method in methods:
+        method_data.append(data[method])
+
     nm = len(methods)
+
+    # create null method.
+    # Using the median of ref as the value on all values
+    median = ref.mean()
+    null = np.array([median for _ in ref])
+    methods += ["null"]
+    method_data.append(null)
+    nm += 1
 
     rmse_list = []
     lower_error = []
@@ -141,8 +155,8 @@ if __name__ == '__main__':
     me_lower = []
     me_upper = []
 
-    for method in methods:
-        mdata = data[method]
+    for i in xrange(nm):
+        mdata = method_data[i]
 
         # RMSE
         mrmse, mle, mue = rmse(mdata, ref)
@@ -175,7 +189,7 @@ if __name__ == '__main__':
             rmse_i = rmse_list[i]
             rmse_j = rmse_list[j]
 
-            r_ij = np.corrcoef(data[m_i], data[m_j])[0][1]
+            r_ij = np.corrcoef(method_data[i], method_data[j])[0][1]
 
             if rmse_i > rmse_j:
                 lower = lower_error[i]
